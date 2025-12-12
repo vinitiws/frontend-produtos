@@ -31,6 +31,8 @@ function App() {
       .then(retorno_convertido => setProdutos(retorno_convertido));
   }, []);
 
+
+  // cadastrar produtos 
   const cadastrar = () => {
     fetch("http://localhost:8081/cadastrar", {
       method: 'post',
@@ -52,9 +54,81 @@ function App() {
       })
   }
 
-  // remover produto
-  const removerProduto = (indice) => {
-   // tentar criar o metodo remover
+  // alterar produtos 
+  const alterar = () => {
+    fetch("http://localhost:8081/alterar/" + objProduto.codigo, {
+      method: 'put',
+      body: JSON.stringify(objProduto),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => {
+
+        if (retorno_convertido.mensagem !== undefined) {
+          alert(retorno_convertido.mensagem);
+        } else {
+
+          // mensagem
+          alert("Produto alterado com sucesso!");
+
+          // copia do vetor de produtos
+          let vetorTemp = [...produtos];
+
+          // indice do produto a ser removido
+          let indice = vetorTemp.findIndex((p) => {
+            return p.codigo === objProduto.codigo;
+          })
+
+          // alterar produto do vertorTemp
+          vetorTemp[indice] = objProduto;
+
+          // atualizar o vetor de produtos
+          setProdutos(vetorTemp);
+
+          // limpar o formulário
+          limparFormulario();
+        }
+      })
+  }
+
+  // remover produtos
+  const remover = () => {
+    fetch("http://localhost:8081/remover/" + objProduto.codigo, {
+      method: 'delete',
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => {
+
+        // mensagem
+        alert(retorno_convertido.mensagem);
+        console.log(retorno_convertido);
+
+        // copia do vetor de produtos
+        let vetorTemp = [...produtos];
+
+        // indice do produto a ser removido
+        let indice = vetorTemp.findIndex((p) => {
+          return p.codigo === objProduto.codigo;
+        })
+
+        // remover produto do vertorTemp
+        vetorTemp.splice(indice, 1);
+
+        // atualizar o vetor de produtos
+        setProdutos(vetorTemp);
+
+        // limpar formulário
+        limparFormulario();
+
+
+      })
   }
 
   // limpar formulario
@@ -69,9 +143,6 @@ function App() {
     setBtnCadastrar(false);
   }
 
-
-
-
   return (
     <div>
       <Formulario
@@ -80,11 +151,13 @@ function App() {
         eventoTeclado={aoDigitar}
         cadastrar={cadastrar}
         cancelar={limparFormulario}
-        remover={removerProduto}
+        remover={remover}
+        alterar={alterar}
       />
       <Tabela
         vetor={produtos}
-        selecionar={selecionarProduto} />
+        selecionar={selecionarProduto}
+      />
     </div>
   );
 }
